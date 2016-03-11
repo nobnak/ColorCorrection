@@ -139,6 +139,7 @@ namespace ColorCorrection {
 
         void Create3DLutTex (int dim) {
             _3dlut = new Texture3D (dim, dim, dim, TextureFormat.ARGB32, false);
+            _3dlut.filterMode = FilterMode.Bilinear;
             _3dcolors = _3dlut.GetPixels ();
         }
         void ReleaseImageTex () {
