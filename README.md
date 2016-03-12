@@ -2,4 +2,4 @@
 
 [Unity Package](ColorCorrection.unitypackage)
 
-[![Thumbnail](https://i.vimeocdn.com/video/558109943_640.jpg)](https://github.com/nobnak/ColorCorrection)
+[![Thumbnail](https://i.vimeocdn.com/video/560306236_640.jpg)](https://github.com/nobnak/ColorCorrection)
