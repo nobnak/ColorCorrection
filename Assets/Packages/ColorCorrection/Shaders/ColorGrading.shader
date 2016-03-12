@@ -1,6 +1,9 @@
 ﻿Shader "Hidden/ColorGrading" {
 	Properties {
 		_MainTex ("Texture", 2D) = "white" {}
+        _ColorGrading_Scale ("Scale", Float) = 0
+        _ColorGrading_Offset ("Offset", Float) = 0
+        _ColorGrading_Lut3D ("LUT", 3D) = "white" {}
 	}
 	SubShader {
 		Cull Off ZWrite Off ZTest Always
@@ -28,17 +31,17 @@
 
             float _ColorGrading_Scale;
             float _ColorGrading_Offset;
-            sampler3D _ColorGrading_3DLut;
+            sampler3D _ColorGrading_Lut3D;
 
             float4 frag (v2f i) : SV_Target {
                 float4 c = tex2D(_MainTex, i.uv);
-                c.rgb = tex3D(_ColorGrading_3DLut, c.rgb * _ColorGrading_Scale + _ColorGrading_Offset).rgb;
+                c.rgb = tex3D(_ColorGrading_Lut3D, c.rgb * _ColorGrading_Scale + _ColorGrading_Offset).rgb;
                 return c;
             }
             float4 fragApproxLinear (v2f i) : SV_Target {
                 float4 c = tex2D(_MainTex, i.uv);
                 c.rgb = sqrt(c.rgb);
-                c.rgb = tex3D(_ColorGrading_3DLut, c.rgb * _ColorGrading_Scale + _ColorGrading_Offset).rgb;
+                c.rgb = tex3D(_ColorGrading_Lut3D, c.rgb * _ColorGrading_Scale + _ColorGrading_Offset).rgb;
                 c.rgb *= c.rgb;
                 return c;
             }

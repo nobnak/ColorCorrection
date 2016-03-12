@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: f68b89cc7cd89e2408e7c31190d94d69
+timeCreated: 1457776777
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - filterMat: {fileID: 2100000, guid: 8c10b2ae3c315fa40a935b50298b8999, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
