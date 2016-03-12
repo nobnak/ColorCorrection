@@ -2,4 +2,4 @@
 
 [Unity Package](ColorCorrection.unitypackage)
 
-[![Thumbnail](Thumbnail.jpg)](https://github.com/nobnak/ColorCorrection)
+[![Thumbnail](Thumbnail.jpg)](https://vimeo.com/158728537)
