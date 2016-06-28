@@ -14,7 +14,6 @@ namespace ColorCorrection {
 
         public DataPathEnum dataPath;
         public DebugModeEnum debugMode;
-        public string propertyPrefix = "_ColorGrading";
         public string lutImageName = "ColorGrading.png";
         public Material filterMat;
 
@@ -24,7 +23,7 @@ namespace ColorCorrection {
 
         void OnEnable() {
             _lastUpdateTime = System.DateTime.MinValue;
-            _lut = new LUT3D (DEFAULT_LUT_DIM, propertyPrefix);
+            _lut = new LUT3D (DEFAULT_LUT_DIM);
         }
         void OnDisable() {
             ReleaseImageTex();

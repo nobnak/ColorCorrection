@@ -7,18 +7,17 @@ namespace ColorCorrection {
         public const int PASS_GAMMA = 0;
         public const int PASS_LINEAR = 1;
 
-        public const string PROP_SCALE = "_Scale";
-        public const string PROP_OFFSET = "_Offset";
-        public const string PROP_3DLUT = "_Lut3D";
+        public const string PROP_SCALE = "_ColorGrading_Scale";
+        public const string PROP_OFFSET = "_ColorGrading_Offset";
+        public const string PROP_3DLUT = "_ColorGrading_Lut3D";
 
         int _dim;
         string _prefix;
         Texture3D _3dlut;
         Color[] _3dcolors;
 
-        public LUT3D(int dim, string prefix) {
+        public LUT3D(int dim) {
             Reset (dim);
-            this._prefix = prefix;
         }
 
         public Color this[int x, int y, int z] {
@@ -26,14 +25,15 @@ namespace ColorCorrection {
                 _3dcolors [x + (y + z * _dim) * _dim] = value;
             }
         }
-        public void Reset(int dim) {
+        public LUT3D Reset(int dim) {
             if (_3dlut == null || _dim != dim) {
                 _dim = dim;
                 Release3DLutTex ();
                 Create3DLutTex (dim);
             }
+            return this;
         }
-        public void Convert(Texture2D lutImage) {
+        public LUT3D Convert(Texture2D lutImage) {
             Reset (lutImage.height);
             var cimg = lutImage.GetPixels ();
             for (var z = 0; z < _dim; z++)
@@ -41,27 +41,36 @@ namespace ColorCorrection {
                     for (var x = 0; x < _dim; x++)
                         this[x, y, z] = cimg [x + (z + (_dim - y - 1) * _dim) * _dim];
             Apply ();
+            return this;
         }
-        public void SetProperty(Material mat) {
-            mat.SetFloat (_prefix + PROP_SCALE, (float)(_dim - 1) / _dim);
-            mat.SetFloat (_prefix + PROP_OFFSET, 1f / (2f * _dim));
-            mat.SetTexture (_prefix + PROP_3DLUT, _3dlut);
-            Debug.LogFormat ("3D LUT exists ? {0}", _3dlut != null);
+        public LUT3D SetProperty(Material mat) {
+            mat.SetFloat (PROP_SCALE, (float)(_dim - 1) / _dim);
+            mat.SetFloat (PROP_OFFSET, 1f / (2f * _dim));
+            mat.SetTexture (PROP_3DLUT, _3dlut);
+            return this;
+        }
+        public LUT3D SetProperty(MaterialPropertyBlock block) {
+            block.SetFloat (PROP_SCALE, (float)(_dim - 1) / _dim);
+            block.SetFloat (PROP_OFFSET, 1f / (2f * _dim));
+            block.SetTexture (PROP_3DLUT, _3dlut);
+            return this;
         }
         public int Pass {
             get { return QualitySettings.activeColorSpace == ColorSpace.Linear ? PASS_LINEAR : PASS_GAMMA; }
         }
-        public void SetDefault() {
+        public LUT3D SetDefault() {
             var dc = 1f / (_dim - 1);
             for (var z = 0; z < _dim; z++)
                 for (var y = 0; y < _dim; y++)
                     for (var x = 0; x < _dim; x++)
                         this[x, y, z] = new Color (x * dc, y * dc, z * dc, 1f);
             Apply ();
+            return this;
         }
-        public void Apply () {
+        public LUT3D Apply () {
             _3dlut.SetPixels (_3dcolors);
             _3dlut.Apply (false);
+            return this;
         }
 
         void Create3DLutTex (int dim) {
