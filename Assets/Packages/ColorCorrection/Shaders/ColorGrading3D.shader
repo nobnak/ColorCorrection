@@ -1,13 +1,15 @@
 ﻿Shader "ColorGrading/ColorGrading3D" {
 	Properties {
 		_MainTex ("Texture", 2D) = "white" {}
+
 	}
 	SubShader {
 		Cull Off ZWrite Off ZTest Always
 
             CGINCLUDE
-            #include "UnityCG.cginc"
-            #include "Assets/Packages/ColorCorrection/Shaders/LUT3D.cginc"
+            #define LUT3D
+            #include "UnityCG.cginc" 
+            #include "Assets/Packages/ColorCorrection/Shaders/LUT.cginc"
 
             struct appdata {
                 float4 vertex : POSITION;
@@ -26,6 +28,7 @@
             }
             
             sampler2D _MainTex;
+            sampler2D _Lut;
 
             float4 frag (v2f i) : SV_Target {
                 float4 c = tex2D(_MainTex, i.uv);

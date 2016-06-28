@@ -8,7 +8,8 @@
 		Cull Off ZWrite Off ZTest Always
 
             CGINCLUDE
-            #include "UnityCG.cginc"
+            //#define LUT3D
+            #include "UnityCG.cginc" 
             #include "Assets/Packages/ColorCorrection/Shaders/LUT.cginc"
 
             struct appdata {

@@ -7,8 +7,8 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: ColorGrading3D
-  m_Shader: {fileID: 4800000, guid: 07346088e8af85e4c9395eb4dd221ece, type: 3}
-  m_ShaderKeywords: 
+  m_Shader: {fileID: 4800000, guid: 467110807e1b34845b5d471783eebaa6, type: 3}
+  m_ShaderKeywords: ' LUT3D'
   m_LightmapFlags: 5
   m_CustomRenderQueue: 2000
   stringTagMap: {}
@@ -24,23 +24,9 @@ Material:
           m_Offset: {x: 0, y: 0}
       data:
         first:
-          name: _ColorGrading_Lut3D
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-      data:
-        first:
-          name: _ColorGrading_3DLut
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-      data:
-        first:
           name: _Lut
         second:
-          m_Texture: {fileID: 2800000, guid: 591b130cba38722478eed34c8e58747b, type: 3}
+          m_Texture: {fileID: 2800000, guid: 7db3a331706e6994db1aac00ff36f02b, type: 3}
           m_Scale: {x: 1, y: 1}
           m_Offset: {x: 0, y: 0}
     m_Floats:

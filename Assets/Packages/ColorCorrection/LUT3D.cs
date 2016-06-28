@@ -3,19 +3,25 @@ using System.Collections;
 using System.IO;
 
 namespace ColorCorrection {
-    public class LUT3D : System.IDisposable {
+	public class LUT3D : System.IDisposable {
+		public const string KW_LUT2D = " LUT2D";
+		public const string KW_LUT3D = " LUT3D";
+		public const int DEFAULT_LUT_DIM = 16;
+
         public const int PASS_GAMMA = 0;
         public const int PASS_LINEAR = 1;
 
-        public const string PROP_SCALE = "_ColorGrading_Scale";
-        public const string PROP_OFFSET = "_ColorGrading_Offset";
-        public const string PROP_3DLUT = "_ColorGrading_Lut3D";
+        public const string PROP_SCALE = "_ColorGrading3D_Scale";
+        public const string PROP_OFFSET = "_ColorGrading3D_Offset";
+		public const string PROP_3DLUT = "_ColorGrading3D_Lut";
 
         int _dim;
         string _prefix;
         Texture3D _3dlut;
         Color[] _3dcolors;
 
+		public LUT3D() : this(DEFAULT_LUT_DIM) {
+		}
         public LUT3D(int dim) {
             Reset (dim);
         }
