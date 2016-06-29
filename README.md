@@ -25,5 +25,6 @@ c = ColorGrade(_Lut, c);
  - Advanced
  - No mipmap
  - Clamped
+ - Bypass sRGB
  - Bilinear
  - Automatic Truecolor
