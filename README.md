@@ -20,3 +20,10 @@ Call ColorGrade() func
 float4 c = tex2D(_MainTex, IN.uv);
 c = ColorGrade(_Lut, c);
 ```
+
+## Recommended LUT texture import settings
+ - Advanced
+ - No mipmap
+ - Clamped
+ - Bilinear
+ - Automatic Truecolor
