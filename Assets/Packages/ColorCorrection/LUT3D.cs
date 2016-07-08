@@ -80,8 +80,10 @@ namespace ColorCorrection {
         }
 
         void Create3DLutTex (int dim) {
-            _3dlut = new Texture3D (dim, dim, dim, TextureFormat.ARGB32, false);
+			_3dlut = new Texture3D (dim, dim, dim, TextureFormat.ARGB32, false);
+			_3dlut.wrapMode = TextureWrapMode.Clamp;
             _3dlut.filterMode = FilterMode.Bilinear;
+			_3dlut.anisoLevel = 0;
             _3dcolors = _3dlut.GetPixels ();
         }
         void Release3DLutTex () {

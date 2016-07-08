@@ -66,9 +66,10 @@ namespace ColorCorrection {
                     _lastUpdateTime = writeTime;
 
 					if (_lutImage == null) {
-                        _lutImage = new Texture2D(2, 2, TextureFormat.ARGB32, false);
+						_lutImage = new Texture2D(2, 2, TextureFormat.ARGB32, false, true);
 						_lutImage.filterMode = FilterMode.Bilinear;
 						_lutImage.wrapMode = TextureWrapMode.Clamp;
+						_lutImage.anisoLevel = 0;
 					}
                     _lutImage.LoadImage(File.ReadAllBytes(path));
 					PostUpateLUT (_lutImage);
