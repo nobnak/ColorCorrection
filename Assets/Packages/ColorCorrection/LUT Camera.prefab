@@ -76,10 +76,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6256a96fa278cc740b904b07557cb661, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateInterval: 0.5
-  dataPath: 0
-  debugMode: 0
-  lutImageName: ColorGrading.png
+  pathType: 0
+  mode: 0
+  dataPath: ColorGrading2D.json
+  toggleKey: 0
+  data:
+    updateInterval: 0.5
+    dataPath: 0
+    debugMode: 0
+    lutImageName: ColorGrading.png
   filterMat: {fileID: 2100000, guid: 8c10b2ae3c315fa40a935b50298b8999, type: 2}
   propLut: _Lut
 --- !u!114 &11464684
@@ -93,10 +98,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0263a4de6987a5043bdb6cfadec921bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateInterval: 0.5
-  dataPath: 0
-  debugMode: 0
-  lutImageName: ColorGrading.png
+  pathType: 0
+  mode: 0
+  dataPath: ColorGrading3D.json
+  toggleKey: 103
+  data:
+    updateInterval: 0.5
+    dataPath: 0
+    debugMode: 0
+    lutImageName: LUT_MeijiJingu.png
   filterMat: {fileID: 2100000, guid: c4cb603c3dace5341b662b7b36bf6f87, type: 2}
 --- !u!1001 &100100000
 Prefab:
