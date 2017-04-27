@@ -1,14 +1,15 @@
-﻿Shader "ColorGrading/ColorGrading" {
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "ColorGrading/ColorGrading3D" {
 	Properties {
 		_MainTex ("Texture", 2D) = "white" {}
-        _Lut ("LUT", 2D) = "black" {}
 
 	}
 	SubShader {
 		Cull Off ZWrite Off ZTest Always
 
             CGINCLUDE
-            //#define LUT3D
+            #define LUT3D
             #include "UnityCG.cginc" 
             #include "Assets/Packages/ColorCorrection/Shaders/LUT.cginc"
 
@@ -23,7 +24,7 @@
 
             v2f vert (appdata v) {
                 v2f o;
-                o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+                o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
                 return o;
             }
@@ -33,12 +34,12 @@
 
             float4 frag (v2f i) : SV_Target {
                 float4 c = tex2D(_MainTex, i.uv);
-                return ColorGrade(_Lut, c);
+                return ColorGrade3D(c);
             }
             float4 fragApproxLinear (v2f i) : SV_Target {
                 float4 c = tex2D(_MainTex, i.uv);
                 c.rgb = sqrt(c.rgb);
-                c = ColorGrade(_Lut, c);
+                c = ColorGrade3D(c);
                 c.rgb *= c.rgb;
                 return c;
             }
