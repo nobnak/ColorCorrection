@@ -20,9 +20,8 @@ namespace ColorCorrection {
             base.OnEnable ();
             _lastUpdateTime = System.DateTime.MinValue;
         }
-        protected override void OnDisable() {
+        protected virtual void OnDisable() {
             ReleaseImageTex();
-            base.OnDisable ();
         }
         protected virtual void OnRenderImage(RenderTexture src, RenderTexture dst) {
             if (filterMat == null || _lutImage == null || data.debugMode == Data.DebugModeEnum.Pass) {
@@ -32,8 +31,7 @@ namespace ColorCorrection {
             SetProperty (filterMat);
 			Graphics.Blit (src, dst, filterMat, GetPass());
         }
-        protected override void Update() {
-            base.Update ();
+        protected virtual void Update() {
             var now = System.DateTime.Now;
             var d = now - _lastUpdateTime;
             if (d.TotalSeconds > data.updateInterval) {
@@ -41,12 +39,15 @@ namespace ColorCorrection {
                 UpdateLUT ();
             }
         }
-        protected override void DrawGUI () {
+        protected virtual void DrawGUI () {
             data.lutImageName = GUILayout.TextField (data.lutImageName);
         }
 
         protected virtual string GetPath() {
-            return MakePath (data.dataPath, data.lutImageName);
+            string path;
+            if (!DataPath (data.dataPath, data.lutImageName, out path))
+                Debug.LogFormat ("Couldn't get a path");
+            return path;            
         }
         protected virtual void UpdateLUT() {
             try {
@@ -83,7 +84,7 @@ namespace ColorCorrection {
             public enum DebugModeEnum { Normal = 0, Pass }
 
             public float updateInterval = 0.5f;
-            public Settings.PathTypeEnum dataPath;
+            public Settings<ColorGrading.Data>.PathTypeEnum dataPath;
             public DebugModeEnum debugMode;
             public string lutImageName = "ColorGrading.png";
         }
