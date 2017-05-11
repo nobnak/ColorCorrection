@@ -55,12 +55,14 @@ namespace ColorCorrection {
         protected virtual void UpdateLUT() {
             try {
                 var path = GetImagePath();
-                var next = (File.Exists (path) ? LoadTypeEnum.ImageFile : LoadTypeEnum.Texture);
+                var next = (File.Exists (path) ? LoadTypeEnum.ImageFile : 
+                    (data.alternativeImage != null ? LoadTypeEnum.Texture : LoadTypeEnum.None));
 
                 switch (next) {
                 case LoadTypeEnum.ImageFile:
                     var writeTime = File.GetLastWriteTime (path);
                     if (writeTime != _lastUpdateTime) {
+                        Debug.LogFormat("Load image from {0}", path);
                         _lastUpdateTime = writeTime;
                         LoadImage (path);
                         UpdateLUT (_lutImage);
@@ -68,10 +70,11 @@ namespace ColorCorrection {
                     break;
                 case LoadTypeEnum.Texture:
                     ReleaseImageTex();
-                    if (current != LoadTypeEnum.Texture && data.alternativeImage != null) {
-                        Debug.Log("Update LUT");
+                    if (current != LoadTypeEnum.Texture && data.alternativeImage != null)
                         UpdateLUT(data.alternativeImage);
-                    }
+                    break;
+                default:
+                    ReleaseImageTex();
                     break;
                 }
 
