@@ -7,7 +7,8 @@ namespace ColorCorrection {
     [ExecuteInEditMode]
     [RequireComponent(typeof(Camera))]
     public abstract class ColorGrading : Settings<ColorGrading.Data> {
-        public Material filterMat;
+        [SerializeField]
+        protected Material filterMat;
 
         protected Texture2D _lutImage;
         protected System.DateTime _lastUpdateTime;
@@ -16,6 +17,7 @@ namespace ColorCorrection {
 		protected abstract int GetPass();
 		protected abstract void PostUpateLUT (Texture2D lut);
 
+        #region Unity
         protected override void OnEnable() {
             base.OnEnable ();
             _lastUpdateTime = System.DateTime.MinValue;
@@ -39,6 +41,8 @@ namespace ColorCorrection {
                 UpdateLUT ();
             }
         }
+        #endregion
+
         protected virtual void DrawGUI () {
             data.lutImageName = GUILayout.TextField (data.lutImageName);
         }
@@ -86,7 +90,7 @@ namespace ColorCorrection {
             public float updateInterval = 0.5f;
             public Settings<ColorGrading.Data>.PathTypeEnum dataPath;
             public DebugModeEnum debugMode;
-            public string lutImageName = "ColorGrading.png";
+            public string lutImageName = "LUT.png";
         }
     }
 }
