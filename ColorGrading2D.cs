@@ -17,7 +17,7 @@ namespace ColorCorrection {
 		protected override int GetPass () {
 			return PASS;
 		}
-		protected override void PostUpateLUT (Texture2D lut) {
+		protected override void UpdateLUT (Texture2D lut) {
 		}
 
 		void UpdateKeyword () {

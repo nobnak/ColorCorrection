@@ -17,7 +17,7 @@ namespace ColorCorrection {
 			base.OnDisable ();
             _lut.Dispose ();
         }
-		protected override void PostUpateLUT (Texture2D lut) {
+		protected override void UpdateLUT (Texture2D lut) {
 			_lut.Convert(lut);
         }
 		protected override void SetProperty (Material mat) {

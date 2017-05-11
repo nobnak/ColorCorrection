@@ -1,32 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.IO;
-using Gist;
 
 namespace ColorCorrection {
     [ExecuteInEditMode]
     [RequireComponent(typeof(Camera))]
-    public abstract class ColorGrading : Settings<ColorGrading.Data> {
+    public abstract class ColorGrading : MonoBehaviour {
+        public enum LoadTypeEnum { None = 0, ImageFile, Texture }
+
+        [SerializeField]
+        protected Data data;
         [SerializeField]
         protected Material filterMat;
 
+        protected LoadTypeEnum current = LoadTypeEnum.None;
         protected Texture2D _lutImage;
         protected System.DateTime _lastUpdateTime;
 
-		protected abstract void SetProperty (Material mat);
-		protected abstract int GetPass();
-		protected abstract void PostUpateLUT (Texture2D lut);
-
         #region Unity
-        protected override void OnEnable() {
-            base.OnEnable ();
+        protected virtual void OnEnable() {
             _lastUpdateTime = System.DateTime.MinValue;
         }
         protected virtual void OnDisable() {
             ReleaseImageTex();
         }
         protected virtual void OnRenderImage(RenderTexture src, RenderTexture dst) {
-            if (filterMat == null || _lutImage == null || data.debugMode == Data.DebugModeEnum.Pass) {
+            if (filterMat == null || current == LoadTypeEnum.None) {
                 Graphics.Blit (src, dst);
                 return;
             }
@@ -43,39 +42,58 @@ namespace ColorCorrection {
         }
         #endregion
 
-        protected virtual void DrawGUI () {
-            data.lutImageName = GUILayout.TextField (data.lutImageName);
+        #region Static
+        public static string GetSpecialFolder(System.Environment.SpecialFolder folder) {
+            return System.Environment.GetFolderPath (folder);
         }
+        #endregion
 
-        protected virtual string GetPath() {
-            string path;
-            if (!DataPath (data.dataPath, data.lutImageName, out path))
-                Debug.LogFormat ("Couldn't get a path");
-            return path;            
-        }
+        protected abstract void SetProperty (Material mat);
+        protected abstract int GetPass();
+        protected abstract void UpdateLUT (Texture2D lut);
+
         protected virtual void UpdateLUT() {
             try {
-                var path = GetPath ();
-                if (!File.Exists (path)) {
+                var path = GetImagePath();
+                var next = (File.Exists (path) ? LoadTypeEnum.ImageFile : LoadTypeEnum.Texture);
+
+                switch (next) {
+                case LoadTypeEnum.ImageFile:
+                    var writeTime = File.GetLastWriteTime (path);
+                    if (writeTime != _lastUpdateTime) {
+                        _lastUpdateTime = writeTime;
+                        LoadImage (path);
+                        UpdateLUT (_lutImage);
+                    }
+                    break;
+                case LoadTypeEnum.Texture:
                     ReleaseImageTex();
-                    return;
+                    if (current != LoadTypeEnum.Texture && data.alternativeImage != null) {
+                        Debug.Log("Update LUT");
+                        UpdateLUT(data.alternativeImage);
+                    }
+                    break;
                 }
 
-                var writeTime = File.GetLastWriteTime (path);
-                if (writeTime != _lastUpdateTime) {
-                    _lastUpdateTime = writeTime;
-
-					if (_lutImage == null) {
-						_lutImage = new Texture2D(2, 2, TextureFormat.ARGB32, false, true);
-						_lutImage.filterMode = FilterMode.Bilinear;
-						_lutImage.wrapMode = TextureWrapMode.Clamp;
-						_lutImage.anisoLevel = 0;
-					}
-                    _lutImage.LoadImage(File.ReadAllBytes(path));
-					PostUpateLUT (_lutImage);
-                }
+                current = next;
             } catch (System.Exception e) {
                 Debug.LogError (e);
+            }
+        }
+
+        string GetImagePath() {
+            return Path.Combine(GetSpecialFolder(System.Environment.SpecialFolder.MyDocuments), data.lutImageName);
+        }
+        void LoadImage (string imageFilePath) {
+            CheckInitImageTex ();
+            _lutImage.LoadImage (File.ReadAllBytes (imageFilePath));
+        }
+        void CheckInitImageTex () {
+            if (_lutImage == null) {
+                _lutImage = new Texture2D (2, 2, TextureFormat.ARGB32, false, true);
+                _lutImage.filterMode = FilterMode.Bilinear;
+                _lutImage.wrapMode = TextureWrapMode.Clamp;
+                _lutImage.anisoLevel = 0;
             }
         }
         void ReleaseImageTex () {
@@ -85,12 +103,9 @@ namespace ColorCorrection {
 
         [System.Serializable]
         public class Data {
-            public enum DebugModeEnum { Normal = 0, Pass }
-
             public float updateInterval = 0.5f;
-            public Settings<ColorGrading.Data>.PathTypeEnum dataPath;
-            public DebugModeEnum debugMode;
             public string lutImageName = "LUT.png";
+            public Texture2D alternativeImage;
         }
     }
 }
