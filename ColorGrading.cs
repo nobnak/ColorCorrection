@@ -13,12 +13,13 @@ namespace ColorCorrection {
         [SerializeField]
         protected Material filterMat;
 
-        protected LoadTypeEnum current = LoadTypeEnum.None;
+        protected LoadTypeEnum current;
         protected Texture2D _lutImage;
         protected System.DateTime _lastUpdateTime;
 
         #region Unity
         protected virtual void OnEnable() {
+            current = LoadTypeEnum.None;
             _lastUpdateTime = System.DateTime.MinValue;
         }
         protected virtual void OnDisable() {
