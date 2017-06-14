@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.IO;
+using Gist;
 
 namespace ColorCorrection {
     [ExecuteInEditMode]
@@ -14,16 +15,27 @@ namespace ColorCorrection {
         protected Material filterMat;
 
         protected LoadTypeEnum current;
-        protected Texture2D _lutImage;
+        protected ImageLoader loader;
         protected System.DateTime _lastUpdateTime;
 
         #region Unity
         protected virtual void OnEnable() {
+            loader = new ImageLoader (TextureFormat.ARGB32, false, true);
+            loader.TextureCreate += (obj) => {
+                obj.filterMode = FilterMode.Bilinear;
+                obj.wrapMode = TextureWrapMode.Clamp;
+                obj.anisoLevel = 0;
+            };
+            loader.TextureUpdate += (obj) => {
+                Debug.Log("Update Texture");
+                UpdateLUT(obj);
+            };
+
             current = LoadTypeEnum.None;
             _lastUpdateTime = System.DateTime.MinValue;
         }
         protected virtual void OnDisable() {
-            ReleaseImageTex();
+            loader.Dispose ();
         }
         protected virtual void OnRenderImage(RenderTexture src, RenderTexture dst) {
             if (filterMat == null || current == LoadTypeEnum.None) {
@@ -35,10 +47,19 @@ namespace ColorCorrection {
         }
         protected virtual void Update() {
             var now = System.DateTime.Now;
-            var d = now - _lastUpdateTime;
-            if (d.TotalSeconds > data.updateInterval) {
+            if ((now - _lastUpdateTime).TotalSeconds > data.updateInterval) {
                 _lastUpdateTime = now;
-                UpdateLUT ();
+
+                var path = GetImagePath();
+                loader.Update(path);
+
+                current = (loader.Image != null ? LoadTypeEnum.Texture :
+                    (data.alternativeImage != null ? LoadTypeEnum.ImageFile : LoadTypeEnum.None));
+                switch (current) {
+                case LoadTypeEnum.ImageFile:
+                    UpdateLUT (data.alternativeImage);
+                    break;
+                }
             }
         }
         #endregion
@@ -53,56 +74,8 @@ namespace ColorCorrection {
         protected abstract int GetPass();
         protected abstract void UpdateLUT (Texture2D lut);
 
-        protected virtual void UpdateLUT() {
-            try {
-                var path = GetImagePath();
-                var next = (File.Exists (path) ? LoadTypeEnum.ImageFile : 
-                    (data.alternativeImage != null ? LoadTypeEnum.Texture : LoadTypeEnum.None));
-
-                switch (next) {
-                case LoadTypeEnum.ImageFile:
-                    var writeTime = File.GetLastWriteTime (path);
-                    if (writeTime != _lastUpdateTime) {
-                        Debug.LogFormat("Load image from {0}", path);
-                        _lastUpdateTime = writeTime;
-                        LoadImage (path);
-                        UpdateLUT (_lutImage);
-                    }
-                    break;
-                case LoadTypeEnum.Texture:
-                    ReleaseImageTex();
-                    if (current != LoadTypeEnum.Texture && data.alternativeImage != null)
-                        UpdateLUT(data.alternativeImage);
-                    break;
-                default:
-                    ReleaseImageTex();
-                    break;
-                }
-
-                current = next;
-            } catch (System.Exception e) {
-                Debug.LogError (e);
-            }
-        }
-
         string GetImagePath() {
             return Path.Combine(GetSpecialFolder(System.Environment.SpecialFolder.MyDocuments), data.lutImageName);
-        }
-        void LoadImage (string imageFilePath) {
-            CheckInitImageTex ();
-            _lutImage.LoadImage (File.ReadAllBytes (imageFilePath));
-        }
-        void CheckInitImageTex () {
-            if (_lutImage == null) {
-                _lutImage = new Texture2D (2, 2, TextureFormat.ARGB32, false, true);
-                _lutImage.filterMode = FilterMode.Bilinear;
-                _lutImage.wrapMode = TextureWrapMode.Clamp;
-                _lutImage.anisoLevel = 0;
-            }
-        }
-        void ReleaseImageTex () {
-            if (_lutImage != null)
-                DestroyImmediate (_lutImage);
         }
 
         [System.Serializable]

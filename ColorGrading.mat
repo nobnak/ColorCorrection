@@ -10,32 +10,22 @@ Material:
   m_Shader: {fileID: 4800000, guid: f68491724f2e8604085f7c123145e0ac, type: 3}
   m_ShaderKeywords: ' LUT2D'
   m_LightmapFlags: 5
+  m_EnableInstancingVariants: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
+  disabledShaderPasses: []
   m_SavedProperties:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TexEnvs:
-      data:
-        first:
-          name: _MainTex
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
-      data:
-        first:
-          name: _Lut
-        second:
-          m_Texture: {fileID: 0}
-          m_Scale: {x: 1, y: 1}
-          m_Offset: {x: 0, y: 0}
+    - _Lut:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
-      data:
-        first:
-          name: _ColorGrading_Scale
-        second: 0.9375
-      data:
-        first:
-          name: _ColorGrading_Offset
-        second: 0.03125
-    m_Colors: {}
+    - _ColorGrading_Offset: 0.03125
+    - _ColorGrading_Scale: 0.9375
+    m_Colors: []

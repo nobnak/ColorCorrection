@@ -12,7 +12,7 @@ namespace ColorCorrection {
 
 		protected override void SetProperty (Material mat) {
 			UpdateKeyword ();
-			mat.SetTexture (propLut, _lutImage);
+            mat.SetTexture (propLut, loader.Image);
 		}
 		protected override int GetPass () {
 			return PASS;
