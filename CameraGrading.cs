@@ -7,9 +7,6 @@ namespace ColorCorrection {
     [ExecuteInEditMode]
     [RequireComponent(typeof(Camera))]
     public class CameraGrading : MonoBehaviour {
-        public const int PASS_GAMMA = 0;
-        public const int PASS_LINEAR = 1;
-
         [SerializeField]
         protected Shader gradingShader;
 
