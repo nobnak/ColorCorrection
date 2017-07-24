@@ -5,21 +5,20 @@ using Gist;
 
 namespace ColorCorrection {
     [ExecuteInEditMode]
-    [RequireComponent(typeof(Camera))]
-    public abstract class ColorGrading : MonoBehaviour {
+    public class ImageLUTLoader : LUTGenerator {
         public enum LoadTypeEnum { None = 0, ImageFile, Texture }
 
         [SerializeField]
         protected Data data;
-        [SerializeField]
-        protected Material filterMat;
 
         protected LoadTypeEnum current;
         protected ImageLoader loader;
         protected System.DateTime _lastUpdateTime;
 
         #region Unity
-        protected virtual void OnEnable() {
+        protected override void OnEnable() {
+            base.OnEnable ();
+
             loader = new ImageLoader (TextureFormat.ARGB32, false, true);
             loader.TextureCreate += (obj) => {
                 obj.filterMode = FilterMode.Bilinear;
@@ -34,17 +33,6 @@ namespace ColorCorrection {
             current = LoadTypeEnum.None;
             _lastUpdateTime = System.DateTime.MinValue;
         }
-        protected virtual void OnDisable() {
-            loader.Dispose ();
-        }
-        protected virtual void OnRenderImage(RenderTexture src, RenderTexture dst) {
-            if (filterMat == null || current == LoadTypeEnum.None) {
-                Graphics.Blit (src, dst);
-                return;
-            }
-            SetProperty (filterMat);
-			Graphics.Blit (src, dst, filterMat, GetPass());
-        }
         protected virtual void Update() {
             var now = System.DateTime.Now;
             if ((now - _lastUpdateTime).TotalSeconds > data.updateInterval) {
@@ -53,30 +41,37 @@ namespace ColorCorrection {
                 var path = GetImagePath();
                 loader.Update(path);
 
-                current = (loader.Image != null ? LoadTypeEnum.Texture :
+                var next = (loader.Image != null ? LoadTypeEnum.Texture :
                     (data.alternativeImage != null ? LoadTypeEnum.ImageFile : LoadTypeEnum.None));
-                switch (current) {
+                switch (next) {
                 case LoadTypeEnum.ImageFile:
                     UpdateLUT (data.alternativeImage);
                     break;
+                case LoadTypeEnum.None:
+                    if (current != LoadTypeEnum.None)
+                        lut.SetDefault ();
+                    break;
                 }
+                current = next;
             }
+        }
+        protected override void OnDisable() {
+            loader.Dispose ();
+            base.OnDisable ();
         }
         #endregion
 
-        #region Static
+		protected void UpdateLUT (Texture2D tex) {
+			lut.Convert(tex);
+            NotifyOnUpdate ();
+        }
+
         public static string GetSpecialFolder(System.Environment.SpecialFolder folder) {
             return System.Environment.GetFolderPath (folder);
         }
-        #endregion
-
-        protected abstract void SetProperty (Material mat);
-        protected abstract int GetPass();
-        protected abstract void UpdateLUT (Texture2D lut);
-
-        string GetImagePath() {
+        protected string GetImagePath() {
             return Path.Combine(GetSpecialFolder(System.Environment.SpecialFolder.MyDocuments), data.lutImageName);
-        }
+        }    
 
         [System.Serializable]
         public class Data {

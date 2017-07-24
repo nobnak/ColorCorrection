@@ -8,7 +8,7 @@ Shader "ColorGrading/ColorGrading3D" {
 	SubShader {
 		Cull Off ZWrite Off ZTest Always
 
-            CGINCLUDE
+        CGINCLUDE
             #define LUT3D
             #include "UnityCG.cginc" 
             #include "Assets/Packages/ColorCorrection/Shaders/LUT.cginc"
@@ -34,16 +34,18 @@ Shader "ColorGrading/ColorGrading3D" {
 
             float4 frag (v2f i) : SV_Target {
                 float4 c = tex2D(_MainTex, i.uv);
-                return ColorGrade3D(c);
-            }
-            float4 fragApproxLinear (v2f i) : SV_Target {
-                float4 c = tex2D(_MainTex, i.uv);
-                c.rgb = sqrt(c.rgb);
+
+                #ifdef UNITY_COLORSPACE_GAMMA
+                c.rgb = GammaToLinear(c.rgb);
                 c = ColorGrade3D(c);
-                c.rgb *= c.rgb;
+                c.rgb = LinearToGammaSpace(c.rgb);
+                #else
+                c = ColorGrade3D(c);
+                #endif
+
                 return c;
             }
-            ENDCG
+        ENDCG
 
         Pass {
             CGPROGRAM
@@ -51,11 +53,5 @@ Shader "ColorGrading/ColorGrading3D" {
             #pragma fragment frag
             ENDCG
         }
-        Pass {
-            CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment fragApproxLinear
-            ENDCG
-        }
-	}
+    }
 }
