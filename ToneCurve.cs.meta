@@ -1,11 +1,10 @@
 fileFormatVersion: 2
-guid: 6cb1aa20315446745b20a0e9d1b3a68a
-timeCreated: 1500881473
+guid: 421473c64a753f04c9e6a631a5b8a5e7
+timeCreated: 1500882906
 licenseType: Pro
 MonoImporter:
   serializedVersion: 2
-  defaultReferences:
-  - gradingShader: {fileID: 4800000, guid: 467110807e1b34845b5d471783eebaa6, type: 3}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

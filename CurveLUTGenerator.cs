@@ -7,19 +7,21 @@ namespace ColorCorrection {
     [ExecuteInEditMode]
     public class CurveLUTGenerator : LUTGenerator {
         [SerializeField]
-        AnimationCurve master = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+        ToneCurve master;
         [SerializeField]
-        AnimationCurve red = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+        ToneCurve red;
         [SerializeField]
-        AnimationCurve green = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+        ToneCurve green;
         [SerializeField]
-        AnimationCurve blue = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+        ToneCurve blue;
 
         protected override void OnEnable() {
             base.OnEnable ();
+            UpdateCurves ();
             UpdateLUT ();
         }
         protected void OnValidate() {
+            UpdateCurves ();
             UpdateLUT ();
         }
 
@@ -35,6 +37,13 @@ namespace ColorCorrection {
                 });
                 NotifyOnUpdate ();
             }
+        }
+
+        void UpdateCurves () {
+            master.Update ();
+            red.Update ();
+            green.Update ();
+            blue.Update ();
         }
     }
 }
