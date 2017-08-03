@@ -36,7 +36,7 @@ Shader "ColorGrading/ColorGrading3D" {
                 float4 c = tex2D(_MainTex, i.uv);
 
                 #ifdef UNITY_COLORSPACE_GAMMA
-                c.rgb = GammaToLinear(c.rgb);
+                c.rgb = GammaToLinearSpace(c.rgb);
                 c = ColorGrade3D(c);
                 c.rgb = LinearToGammaSpace(c.rgb);
                 #else
