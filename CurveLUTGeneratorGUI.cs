@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ColorCorrection;
-using DataUI;
+using Gist.DataUI;
 
 namespace ColorCorrection {
     
