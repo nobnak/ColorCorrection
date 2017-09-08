@@ -23,7 +23,7 @@ namespace ColorCorrection {
         }
         #endregion
 
-        protected void NotifyOnUpdate() {
+        protected virtual void NotifyOnUpdate() {
             LUTOnUpdate.Invoke (lut);
         }
 

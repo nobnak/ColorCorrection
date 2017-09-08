@@ -22,9 +22,8 @@ namespace ColorCorrection {
         }
 
         public Color this[int x, int y, int z] {
-            set {
-                _3dcolors [x + (y + z * _dim) * _dim] = value;
-            }
+            set { _3dcolors [IndexOf3D(x, y, z)] = value; }
+            get { return _3dcolors[IndexOf3D(x, y, z)]; }
         }
         public LUT3D Reset(int dim) {
             if (_3dlut == null || _dim != dim) {
@@ -65,7 +64,33 @@ namespace ColorCorrection {
         public LUT3D Convert(Texture2D lutImage) {
             var dim = lutImage.height;
             var pixels = lutImage.GetPixels ();
-            return Convert ((x, y, z) => pixels [x + (z + (dim - y - 1) * dim) * dim], dim);
+            return Convert ((x, y, z) => pixels [IndexOf2D(x, y, z, dim)], dim);
+        }
+        public void ConvertBack(Texture2D lutImage) {
+            var height = _dim;
+            var width = _dim * _dim;
+            lutImage.Resize (width, height);
+
+            var pixels = lutImage.GetPixels ();
+            for (var z = 0; z < _dim; z++)
+                for (var y = 0; y < _dim; y++)
+                    for (var x = 0; x < _dim; x++)
+                        pixels [IndexOf2D(x, y, z)] = this [x, y, z];
+            lutImage.SetPixels (pixels);
+            lutImage.Apply ();
+        }
+
+        public int IndexOf2D(int x, int y, int z) {
+            return IndexOf2D (x, y, z, _dim);
+        }
+        public static int IndexOf2D(int x, int y, int z, int dim) {
+            return x + (z + (dim - y - 1) * dim) * dim;
+        }
+        public int IndexOf3D(int x, int y, int z) {
+            return IndexOf3D(x, y, z, _dim);
+        }
+        public static int IndexOf3D(int x, int y, int z, int dim) {
+            return x + (y + z * dim) * dim;
         }
         #endregion
 

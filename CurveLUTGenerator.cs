@@ -4,46 +4,42 @@ using UnityEngine;
 using ColorCorrection;
 
 namespace ColorCorrection {
+    
     [ExecuteInEditMode]
     public class CurveLUTGenerator : LUTGenerator {
-        [SerializeField]
-        ToneCurve master;
-        [SerializeField]
-        ToneCurve red;
-        [SerializeField]
-        ToneCurve green;
-        [SerializeField]
-        ToneCurve blue;
+        public ToneCurve master;
+        public ColorModulator hsv;
 
         protected override void OnEnable() {
             base.OnEnable ();
-            UpdateCurves ();
-            UpdateLUT ();
+            UpdateAll ();
         }
-        protected void OnValidate() {
-            UpdateCurves ();
-            UpdateLUT ();
+        protected virtual void OnValidate() {
+            UpdateAll ();
         }
 
-        void UpdateLUT () {
+        public virtual void UpdateLUT () {
             if (lut != null) {
                 lut.Convert ((float x, float y, float z) => {
                     var v = Mathf.Max(x, Mathf.Max(y, z));
                     var m = master.Evaluate(v) / v;
-                    return new Color(
-                        m * red.Evaluate(x),
-                        m * green.Evaluate(y),
-                        m * blue.Evaluate(z));
+                    var c = new Color(
+                        m * x,
+                        m * y,
+                        m * z);
+                    return hsv.Evaluate(c);
                 });
                 NotifyOnUpdate ();
             }
         }
 
-        void UpdateCurves () {
+        public virtual void UpdateAll () {
+            UpdateCurves ();
+            UpdateLUT ();
+        }
+
+        public virtual void UpdateCurves () {
             master.Update ();
-            red.Update ();
-            green.Update ();
-            blue.Update ();
         }
     }
 }
