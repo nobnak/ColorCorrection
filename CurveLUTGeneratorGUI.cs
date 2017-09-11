@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ColorCorrection;
 using Gist.DataUI;
+using DataUI.Settings;
 
 namespace ColorCorrection {
     
@@ -11,99 +12,54 @@ namespace ColorCorrection {
         public const float LABEL_WIDTH = 100f;
 
         [SerializeField]
-        KeyCode toggleKey;
+        AbstractSettingsUI.SettingsCore settings;
         [SerializeField]
-        bool enabledGUI;
+        Data data;
 
-        Rect window = new Rect (10f, 10f, 300f, 300f);
+        [System.Serializable]
+        public class Data {
+            public float curveWhite;
+            public float curveBlack;
+            public float curveHighlight;
+            public float curveShadow;
 
-        TextFloat curveWhite;
-        TextFloat curveBlack;
-        TextFloat curveHighlight;
-        TextFloat curveShadow;
+            public float hsvHue;
+            public float hsvSaturation;
+            public float hsvValue;
 
-        TextFloat hsvHue;
-        TextFloat hsvSaturation;
-        TextFloat hsvValue;
+            public bool bypass;
+        }
 
         #region Unity
         protected override void OnEnable () {
             base.OnEnable ();
-            Load ();
+            settings.OnDataChange.AddListener (() => {
+                Load ();
+                UpdateAll ();
+            });
+            settings.OnEnable (data);
         }
         protected virtual void Update() {
-            if (Input.GetKeyDown (toggleKey))
-                enabledGUI = !enabledGUI;
+            settings.Update (data);
         }
         protected virtual void OnGUI() {
-            if (enabledGUI)
-                window = GUILayout.Window (GetInstanceID (), window, Window, name);
+            if (settings.mode == AbstractSettingsUI.SettingsCore.ModeEnum.GUI)
+                settings.OnGUI (this);
+        }
+        protected virtual void OnDisable() {
+            settings.OnDataChange.RemoveAllListeners();
         }
         #endregion
 
-        void Window(int id) {
-            GUI.changed = false;
-            GUILayout.BeginVertical ();
-
-            GUILayout.Label ("Curve");
-
-            Item ("- White", curveWhite);
-            Item ("- Black", curveBlack);
-            Item ("- Highlight", curveHighlight);
-            Item ("- Shadow", curveShadow);
-
-            GUILayout.Label ("HSV");
-            Item ("- Hue", hsvHue);
-            Item ("- Saturation", hsvSaturation);
-            Item ("- Value", hsvValue);
-
-            if (GUILayout.Button ("Reset")) {
-                master.Clear ();
-                hsv.Clear ();
-                UpdateAll ();
-                Load ();
-            }
-
-            GUILayout.EndVertical ();
-            GUI.DragWindow ();
-
-            if (GUI.changed) {
-                Save ();
-                UpdateAll ();
-            }
-        }
-
-        void Item (string label, TextFloat textFloat) {
-            GUILayout.BeginHorizontal ();
-            GUILayout.Label (label, GUILayout.Width (LABEL_WIDTH));
-            textFloat.StrValue = GUILayout.TextField (textFloat.StrValue);
-            GUILayout.EndHorizontal ();
-        }
-
-        void Save () {
-            master.white = curveWhite.Value;
-            master.black = curveBlack.Value;
-            master.highlight = curveHighlight.Value;
-            master.shadow = curveShadow.Value;
-            hsv.hue = hsvHue.Value;
-            hsv.saturation = hsvSaturation.Value;
-            hsv.value = hsvValue.Value;
-        }
         void Load () {
-            LoadOrInitTextFloat (ref curveWhite, master.white);
-            LoadOrInitTextFloat(ref curveBlack, master.black);
-            LoadOrInitTextFloat(ref curveHighlight, master.highlight);
-            LoadOrInitTextFloat(ref curveShadow, master.shadow);
-            LoadOrInitTextFloat(ref hsvHue, hsv.hue);
-            LoadOrInitTextFloat(ref hsvSaturation, hsv.saturation);
-            LoadOrInitTextFloat(ref hsvValue, hsv.value);
-        }
-
-        void LoadOrInitTextFloat (ref TextFloat text, float v) {
-            if (text == null)
-                text = new TextFloat (v);
-            else
-                text.Value = v;
+            master.white = data.curveWhite;
+            master.black = data.curveBlack;
+            master.highlight = data.curveHighlight;
+            master.shadow = data.curveShadow;
+            hsv.hue = data.hsvHue;
+            hsv.saturation = data.hsvSaturation;
+            hsv.value = data.hsvValue;
+            bypass = data.bypass;
         }
     }
 }
