@@ -10,6 +10,9 @@ namespace ColorCorrection {
         public const string PROP_OFFSET = "_ColorGrading3D_Offset";
         public const string PROP_3DLUT = "_ColorGrading3D_Lut";
 
+        public delegate Color ColorPickerInt(int x, int y, int z);
+        public delegate Color ColorPickerNorm(float x, float y, float z);
+
         int _dim;
         string _prefix;
         Texture3D _3dlut;
@@ -36,7 +39,7 @@ namespace ColorCorrection {
             return this;
         }
         #region Convert 
-        public LUT3D Convert(System.Func<float, float, float, Color> ColorPicker) {
+        public LUT3D Convert(ColorPickerNorm ColorPicker) {
             var dx = 1f / (_dim - 1);
             for (var z = 0; z < _dim; z++)
                 for (var y = 0; y < _dim; y++)
@@ -45,7 +48,7 @@ namespace ColorCorrection {
             Apply ();
             return this;
         }
-        public LUT3D Convert(System.Func<int, int, int, Color> Pixels) {
+        public LUT3D Convert(ColorPickerInt Pixels) {
             for (var z = 0; z < _dim; z++)
                 for (var y = 0; y < _dim; y++)
                     for (var x = 0; x < _dim; x++)
@@ -53,11 +56,11 @@ namespace ColorCorrection {
             Apply ();
             return this;
         }
-        public LUT3D Convert(System.Func<int, int, int, Color> Pixels, int dim) {
+        public LUT3D Convert(ColorPickerInt Pixels, int dim) {
             Reset (dim);
             return Convert (Pixels);
         }
-        public LUT3D Convert(System.Func<float, float, float, Color> ColorPicker, int dim) {
+        public LUT3D Convert(ColorPickerNorm ColorPicker, int dim) {
             Reset (dim);
             return Convert (ColorPicker);
         }
@@ -110,7 +113,7 @@ namespace ColorCorrection {
         public Texture Texture { get { return _3dlut; } }
 
         public LUT3D SetDefault() {
-            Convert ((float x, float y, float z) => new Color (x, y, z, 1f));
+            Convert (new ColorPickerNorm(ConverterBypass));
             Apply ();
             return this;
         }
@@ -120,6 +123,9 @@ namespace ColorCorrection {
             return this;
         }
 
+        public static Color ConverterBypass(float x, float y, float z) {
+            return new Color (x, y, z, 1f);
+        }
         static Texture3D Create3DLutTex (int dim) {
             var tex3d = new Texture3D (dim, dim, dim, TextureFormat.ARGB32, false);
 			tex3d.wrapMode = TextureWrapMode.Clamp;

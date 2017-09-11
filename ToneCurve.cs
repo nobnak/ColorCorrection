@@ -9,7 +9,7 @@ namespace ColorCorrection {
         public const float WHITE_POINT = 1f;
         public const float BLACK_POINT = 0f;
         public const float EPSILON = 1e-4f;
-        public const float CONTROL_HEIGHT = 1f / 2;
+        public const float CONTROL_HEIGHT = 0.667f;
         public const int SUBDIVITIONS = 10;
 
         [Range(-1f, 1f)]

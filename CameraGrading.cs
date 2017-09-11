@@ -4,6 +4,7 @@ using System.IO;
 using Gist;
 
 namespace ColorCorrection {
+    
     [ExecuteInEditMode]
     [RequireComponent(typeof(Camera))]
     public class CameraGrading : MonoBehaviour {

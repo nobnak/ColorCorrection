@@ -9,6 +9,7 @@ namespace ColorCorrection {
     public class CurveLUTGenerator : LUTGenerator {
         public ToneCurve master;
         public ColorModulator hsv;
+        public bool bypass = false;
 
         protected override void OnEnable() {
             base.OnEnable ();
@@ -20,15 +21,10 @@ namespace ColorCorrection {
 
         public virtual void UpdateLUT () {
             if (lut != null) {
-                lut.Convert ((float x, float y, float z) => {
-                    var v = Mathf.Max(x, Mathf.Max(y, z));
-                    var m = master.Evaluate(v) / v;
-                    var c = new Color(
-                        m * x,
-                        m * y,
-                        m * z);
-                    return hsv.Evaluate(c);
-                });
+                var conv = (bypass ? 
+                    new LUT3D.ColorPickerNorm (LUT3D.ConverterBypass) : 
+                    new LUT3D.ColorPickerNorm (Converter));
+                lut.Convert (conv);
                 NotifyOnUpdate ();
             }
         }
@@ -40,6 +36,16 @@ namespace ColorCorrection {
 
         public virtual void UpdateCurves () {
             master.Update ();
+        }
+
+        protected virtual Color Converter(float x, float y, float z) {
+            var v = Mathf.Max(x, Mathf.Max(y, z));
+            var m = master.Evaluate(v) / v;
+            var c = new Color(
+                m * x,
+                m * y,
+                m * z);
+            return hsv.Evaluate(c);
         }
     }
 }
