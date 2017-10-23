@@ -46,7 +46,7 @@ namespace ColorCorrection {
             if (settings.mode == AbstractSettingsUI.SettingsCore.ModeEnum.GUI)
                 settings.OnGUI (this);
         }
-        protected virtual void OnDisable() {
+        protected override void OnDisable() {
             settings.OnDataChange.RemoveAllListeners();
         }
         #endregion
