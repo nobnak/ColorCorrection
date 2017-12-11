@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using Gist;
+using nobnak.Gist;
 
 namespace ColorCorrection {
     [ExecuteInEditMode]

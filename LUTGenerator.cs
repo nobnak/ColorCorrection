@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.IO;
-using Gist;
+using nobnak.Gist;
 
 namespace ColorCorrection {
     public abstract class LUTGenerator : MonoBehaviour {
