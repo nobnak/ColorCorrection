@@ -66,6 +66,8 @@ namespace ColorCorrection {
         }
         public LUT3D Convert(Texture2D lutImage) {
             var dim = lutImage.height;
+            Reset(dim);
+
             var pixels = lutImage.GetPixels ();
             return Convert ((x, y, z) => pixels [IndexOf2D(x, y, z, dim)], dim);
         }
