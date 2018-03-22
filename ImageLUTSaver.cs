@@ -1,8 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using nobnak.Gist;
+using nobnak.Gist.ObjectExt;
 
 namespace ColorCorrection {
     [ExecuteInEditMode]
@@ -14,7 +15,7 @@ namespace ColorCorrection {
 
         #region Unity
         void OnDisable() {
-            ObjectDestructor.Destroy (buffer);
+			buffer.Destroy();
         }
         #endregion
 
