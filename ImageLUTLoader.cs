@@ -1,10 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
+using nobnak.Gist.Loader;
 using System.IO;
-using nobnak.Gist;
+using UnityEngine;
 
 namespace ColorCorrection {
-    [ExecuteInEditMode]
+	[ExecuteInEditMode]
     public class ImageLUTLoader : LUTGenerator {
         public enum LoadTypeEnum { None = 0, ImageFile, Texture }
 
@@ -20,15 +19,13 @@ namespace ColorCorrection {
             base.OnEnable ();
 
             loader = new ImageLoader (TextureFormat.ARGB32, false, true);
-            loader.TextureCreate += (obj) => {
-                obj.filterMode = FilterMode.Bilinear;
-                obj.wrapMode = TextureWrapMode.Clamp;
-                obj.anisoLevel = 0;
-            };
-            loader.TextureUpdate += (obj) => {
-                Debug.Log("Update Texture");
-                UpdateLUT(obj);
-            };
+            loader.Changed += (tex) => {
+				tex.filterMode = FilterMode.Bilinear;
+				tex.wrapMode = TextureWrapMode.Clamp;
+				tex.anisoLevel = 0;
+				Debug.Log("Update Texture");
+				UpdateLUT(tex);
+			};
 
             current = LoadTypeEnum.None;
             _lastUpdateTime = System.DateTime.MinValue;
@@ -39,9 +36,9 @@ namespace ColorCorrection {
                 _lastUpdateTime = now;
 
                 var path = GetImagePath();
-                loader.Update(path);
+                loader.CurrentFilePath = path;
 
-                var next = (loader.Image != null ? LoadTypeEnum.Texture :
+                var next = (loader.Target != null ? LoadTypeEnum.Texture :
                     (data.alternativeImage != null ? LoadTypeEnum.ImageFile : LoadTypeEnum.None));
                 switch (next) {
                 case LoadTypeEnum.ImageFile:

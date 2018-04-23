@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using nobnak.Gist;
 using nobnak.Gist.ObjectExt;
+using nobnak.Gist.Extensions.Texture2DExt;
 
 namespace ColorCorrection {
     [ExecuteInEditMode]
@@ -36,7 +37,7 @@ namespace ColorCorrection {
         }
         public Texture2D GetBuffer() {
             if (buffer == null)
-                buffer = new Texture2D (4, 4, TextureFormat.ARGB32, false, true);
+                buffer = buffer.Create(4, 4, TextureFormat.ARGB32, false, true);
             return buffer;
         }
     }
