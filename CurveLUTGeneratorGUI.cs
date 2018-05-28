@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ColorCorrection;
@@ -46,7 +46,7 @@ namespace ColorCorrection {
             if (settings.mode == AbstractSettingsUI.SettingsCore.ModeEnum.GUI)
                 settings.OnGUI (this);
         }
-        protected override void OnDisable() {
+        protected void OnDisable() {
             settings.OnDataChange.RemoveAllListeners();
         }
         #endregion

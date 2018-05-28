@@ -10,20 +10,21 @@ namespace ColorCorrection {
 		protected LUT3D lut;
 
         #region Unity
-        protected virtual void OnEnable() {
+		protected virtual void Awake() {
 			lut = new LUT3D();
+		}
+		protected virtual void OnEnable() {
             NotifyOnUpdate ();
         }
-        protected virtual void OnDisable() {
-            if (lut != null) {
+		protected virtual void OnDestroy() {
+			if (lut != null) {
 				lut.Dispose();
 				lut = null;
-                NotifyOnUpdate ();
-            }
-        }
-        #endregion
+			}
+		}
+		#endregion
 
-        protected virtual void NotifyOnUpdate() {
+		protected virtual void NotifyOnUpdate() {
             LUTOnUpdate.Invoke (lut);
         }
 

@@ -5,47 +5,37 @@ using UnityEngine;
 namespace ColorCorrection {
 	[ExecuteInEditMode]
     public class ImageLUTLoader : LUTGenerator {
-        [SerializeField]
-        protected Data data;
+		[SerializeField]
+		public Texture2D alternativeImage;
+		[SerializeField]
+		public ImageLoader loader;
 
-        #region Unity
-        protected override void OnEnable() {
-            base.OnEnable ();
-
-			data.loader.Changed += UpdateLUT;
-			UpdateLUT(data.loader.Target);
+		#region Unity
+		protected override void Awake() {
+			base.Awake();
+			loader.Changed += UpdateLUT;
 		}
-		protected void OnValidate() {
-			if (data != null && data.loader != null)
-				UpdateLUT(data.loader.Target);
-			else
-				UpdateLUT(null);
+		protected void Update() {
+			loader.Validate();
 		}
-		protected override void OnDisable() {
-			data.loader.Changed -= UpdateLUT;
-			UpdateLUT(null);
-            base.OnDisable ();
+		protected override void OnDestroy() {
+			loader.Dispose();
+			base.OnDestroy();
         }
         #endregion
 
 		protected void UpdateLUT (Texture2D tex) {
+			Debug.Log("UpdateLUT");
 			if (lut != null) {
 				if (tex != null)
 					lut.Convert(tex);
-				else if (data.alternativeImage != null)
-					lut.Convert(data.alternativeImage);
+				else if (alternativeImage != null)
+					lut.Convert(alternativeImage);
 				else
 					lut.SetDefault();
 
 				NotifyOnUpdate();
 			}
         }
-
-        [System.Serializable]
-        public class Data {
-            public Texture2D alternativeImage;
-			[SerializeField]
-			public ImageLoader loader;
-		}
     }
 }
