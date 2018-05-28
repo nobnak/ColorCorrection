@@ -1,43 +1,34 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.IO;
 using nobnak.Gist;
+using nobnak.Gist.ObjectExt;
 
 namespace ColorCorrection {
     
     [ExecuteInEditMode]
     [RequireComponent(typeof(Camera))]
     public class CameraGrading : MonoBehaviour {
-        [SerializeField]
-        protected Shader gradingShader;
+		public const string MATERIAL_NAME = "ColorGrading";
 
-        protected Material gradingMat;
+		protected Material colorGradingMat;
 
         public LUT3D Lut { get; set; }
 
         #region Unity
         protected virtual void OnEnable() {
-            gradingMat = new Material (gradingShader);
+			colorGradingMat = Resources.Load<Material>(MATERIAL_NAME);
         }
         protected virtual void OnDisable() {
-            Release (gradingMat);
+			Resources.UnloadAsset(colorGradingMat);
         }
         protected virtual void OnRenderImage(RenderTexture src, RenderTexture dst) {
             if (Lut != null) {
-                Lut.SetProperty (gradingMat);
-                Graphics.Blit (src, dst, gradingMat);
+                Lut.SetProperty (colorGradingMat);
+                Graphics.Blit (src, dst, colorGradingMat);
             } else {
                 Graphics.Blit (src, dst);
             }
-        }
-        #endregion
-
-        #region Static
-        public static void Release(Object obj) {
-            if (Application.isPlaying)
-                Destroy (obj);
-            else
-                DestroyImmediate (obj);
         }
         #endregion
     }

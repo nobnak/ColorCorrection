@@ -11,7 +11,7 @@ Shader "ColorGrading/ColorGrading3D" {
         CGINCLUDE
             #define LUT3D
             #include "UnityCG.cginc" 
-            #include "Assets/Packages/ColorCorrection/Shaders/LUT.cginc"
+            #include "LUT.cginc"
 
             struct appdata {
                 float4 vertex : POSITION;

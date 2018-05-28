@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.IO;
+using nobnak.Gist.ObjectExt;
 
 namespace ColorCorrection {
 	public class LUT3D : System.IDisposable {
@@ -31,7 +32,7 @@ namespace ColorCorrection {
         public LUT3D Reset(int dim) {
             if (_3dlut == null || _dim != dim) {
                 _dim = dim;
-                Release3DLutTex (_3dlut);
+				_3dlut.Destroy();
                 _3dlut = Create3DLutTex (dim);
                 _3dcolors = _3dlut.GetPixels ();
             }
@@ -135,13 +136,10 @@ namespace ColorCorrection {
 			tex3d.anisoLevel = 0;
             return tex3d;
         }
-        static void Release3DLutTex (Object obj) {
-            GameObject.DestroyImmediate (obj);
-        }
 
         #region IDisposable implementation
         public void Dispose () {
-            Release3DLutTex (_3dlut);
+			_3dlut.Destroy();
             _3dcolors = null;
         }
         #endregion
