@@ -1,5 +1,6 @@
 using nobnak.Gist.Loader;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 namespace ColorCorrection {
@@ -25,14 +26,19 @@ namespace ColorCorrection {
         #endregion
 
 		protected void UpdateLUT (Texture2D tex) {
-			Debug.Log("UpdateLUT");
 			if (lut != null) {
-				if (tex != null)
+				var buf = new StringBuilder("UpdateLUT : ");
+				if (tex != null) {
 					lut.Convert(tex);
-				else if (alternativeImage != null)
+					buf.AppendFormat(tex.name);
+				} else if (alternativeImage != null) {
 					lut.Convert(alternativeImage);
-				else
+					buf.AppendFormat("Alternative {0}", alternativeImage.name);
+				} else {
 					lut.SetDefault();
+					buf.AppendFormat("Reset");
+				}
+				Debug.Log(buf.ToString());
 
 				NotifyOnUpdate();
 			}
