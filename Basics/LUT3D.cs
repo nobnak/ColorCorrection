@@ -25,8 +25,9 @@ namespace ColorCorrection {
         public LUT3D(int dim) {
             Reset (dim);
         }
-		
-        public LUT3D Reset(int dim) {
+
+		#region public
+		public LUT3D Reset(int dim) {
             if (_3dlut == null || _dim != dim) {
                 _dim = dim;
 				_3dlut.Destroy();
@@ -51,13 +52,13 @@ namespace ColorCorrection {
 
 			var indexer = new TiledCubeIndexer(cubeSize, w / cubeSize);
 			var inputs = lutImage.GetPixels();
-			var outputs = IterateCubicIndex().Select(i => inputs[indexer[i]]).ToArray();
+			var outputs = IterateCubicIndex(_dim).Select(i => inputs[indexer[i]]).ToArray();
 			Apply(outputs);
 			return this;
 		}
 		public LUT3D SetDefault() {
 			var dx = 1f / (_dim - 1);
-			var identity = IterateCubicIndex()
+			var identity = IterateCubicIndex(_dim)
 				.Select(v => new Color(v.x * dx, v.y * dx, v.z * dx, 1f))
 				.ToArray();
 			Apply(identity);
@@ -65,12 +66,12 @@ namespace ColorCorrection {
 		}
 		#endregion
 
-		public virtual IEnumerable<Vector3Int> IterateCubicIndex() {
-			for (var z = 0; z < _dim; z++)
-				for (var y = 0; y < _dim; y++)
-					for (var x = 0; x < _dim; x++)
-						yield return new Vector3Int(x, y, z);
+		#region IDisposable implementation
+		public void Dispose() {
+			_3dlut.Destroy();
 		}
+		#endregion
+
 		public virtual void SetProperty(Material mat) {
             mat.SetFloat (PROP_SCALE, Scale);
             mat.SetFloat (PROP_OFFSET, Offset);
@@ -91,22 +92,25 @@ namespace ColorCorrection {
             _3dlut.Apply (false);
             return this;
         }
+		#endregion
 
-        public static Color ConverterBypass(float x, float y, float z) {
+		#region static
+		public static Color ConverterBypass(float x, float y, float z) {
             return new Color (x, y, z, 1f);
         }
-        static Texture3D Create3DLutTex (int dim) {
+        public static Texture3D Create3DLutTex (int dim) {
             var tex3d = new Texture3D (dim, dim, dim, TextureFormat.ARGB32, false);
 			tex3d.wrapMode = TextureWrapMode.Clamp;
             tex3d.filterMode = FilterMode.Bilinear;
 			tex3d.anisoLevel = 0;
             return tex3d;
-        }
-
-        #region IDisposable implementation
-        public void Dispose () {
-			_3dlut.Destroy();
-        }
-        #endregion
-    }
+		}
+		public static IEnumerable<Vector3Int> IterateCubicIndex(int size) {
+			for (var z = 0; z < size; z++)
+				for (var y = 0; y < size; y++)
+					for (var x = 0; x < size; x++)
+						yield return new Vector3Int(x, y, z);
+		}
+		#endregion
+	}
 }
