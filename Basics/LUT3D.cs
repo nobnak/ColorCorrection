@@ -39,23 +39,28 @@ namespace ColorCorrection {
 
         #region Convert 
         public LUT3D Convert(Texture2D lutImage) {
-			var w = lutImage.width;
-            var h = lutImage.height;
-			var cubeSize = Mathf.RoundToInt(Mathf.Pow(w * h, 1f / 3));
-			if (cubeSize <= 0 || cubeSize * cubeSize * cubeSize != w * h) {
+			var imageWidth = lutImage.width;
+			var imageHeight = lutImage.height;
+			var inputs = lutImage.GetPixels();
+			return Convert(imageWidth, imageHeight, inputs);
+		}
+
+		private LUT3D Convert(int imageWidth, int imageHeight, Color[] inputs) {
+			var cubeSize = Mathf.RoundToInt(Mathf.Pow(imageWidth * imageHeight, 1f / 3));
+			if (cubeSize <= 0 || cubeSize * cubeSize * cubeSize != imageWidth * imageHeight) {
 				Debug.LogWarningFormat(
 					"Cannot convert image : size={0}x{1} estimated dim={2}",
-					w, h, cubeSize);
+					imageWidth, imageHeight, cubeSize);
 				return this;
 			}
 			Reset(cubeSize);
 
-			var indexer = new TiledCubeIndexer(cubeSize, w / cubeSize);
-			var inputs = lutImage.GetPixels();
+			var indexer = new TiledCubeIndexer(cubeSize, imageWidth / cubeSize);
 			var outputs = IterateCubicIndex(_dim).Select(i => inputs[indexer[i]]).ToArray();
 			Apply(outputs);
 			return this;
 		}
+
 		public LUT3D SetDefault() {
 			var dx = 1f / (_dim - 1);
 			var identity = IterateCubicIndex(_dim)
@@ -83,6 +88,7 @@ namespace ColorCorrection {
             block.SetTexture (PROP_3DLUT, _3dlut);
         }
 
+		public int Size { get { return _dim; } }
         public float Scale { get { return (_dim - 1f) / _dim; } }
         public float Offset { get { return 1f / (2f * _dim); } }
         public Texture Texture { get { return _3dlut; } }
