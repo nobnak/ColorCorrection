@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ColorCorrection;
@@ -24,7 +24,7 @@ namespace ColorCorrection {
                 var conv = (bypass ? 
                     new LUT3D.ColorPickerNorm (LUT3D.ConverterBypass) : 
                     new LUT3D.ColorPickerNorm (Converter));
-                lut.Convert (conv);
+                //lut.Convert (conv);
                 NotifyOnUpdate ();
             }
         }

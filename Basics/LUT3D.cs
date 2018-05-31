@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections;
 using System.IO;
 using nobnak.Gist.ObjectExt;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace ColorCorrection {
 	public class LUT3D : System.IDisposable {
@@ -17,90 +19,59 @@ namespace ColorCorrection {
         int _dim;
         string _prefix;
         Texture3D _3dlut;
-        Color[] _3dcolors;
 
 		public LUT3D() : this(DEFAULT_LUT_DIM) {
 		}
         public LUT3D(int dim) {
             Reset (dim);
         }
-
-        public Color this[int x, int y, int z] {
-            set { _3dcolors [IndexOf3D(x, y, z)] = value; }
-            get { return _3dcolors[IndexOf3D(x, y, z)]; }
-        }
+		
         public LUT3D Reset(int dim) {
             if (_3dlut == null || _dim != dim) {
                 _dim = dim;
 				_3dlut.Destroy();
                 _3dlut = Create3DLutTex (dim);
-                _3dcolors = _3dlut.GetPixels ();
             }
             SetDefault ();
             return this;
         }
+
         #region Convert 
-        public LUT3D Convert(ColorPickerNorm ColorPicker) {
-            var dx = 1f / (_dim - 1);
-            for (var z = 0; z < _dim; z++)
-                for (var y = 0; y < _dim; y++)
-                    for (var x = 0; x < _dim; x++)
-                        this [x, y, z] = ColorPicker (x * dx, y * dx, z * dx);
-            Apply ();
-            return this;
-        }
-        public LUT3D Convert(ColorPickerInt Pixels) {
-            for (var z = 0; z < _dim; z++)
-                for (var y = 0; y < _dim; y++)
-                    for (var x = 0; x < _dim; x++)
-                        this [x, y, z] = Pixels (x, y, z); 
-            Apply ();
-            return this;
-        }
-        public LUT3D Convert(ColorPickerInt Pixels, int dim) {
-            Reset (dim);
-            return Convert (Pixels);
-        }
-        public LUT3D Convert(ColorPickerNorm ColorPicker, int dim) {
-            Reset (dim);
-            return Convert (ColorPicker);
-        }
         public LUT3D Convert(Texture2D lutImage) {
-            var dim = lutImage.height;
-            Reset(dim);
+			var w = lutImage.width;
+            var h = lutImage.height;
+			var cubeSize = Mathf.RoundToInt(Mathf.Pow(w * h, 1f / 3));
+			if (cubeSize <= 0 || cubeSize * cubeSize * cubeSize != w * h) {
+				Debug.LogWarningFormat(
+					"Cannot convert image : size={0}x{1} estimated dim={2}",
+					w, h, cubeSize);
+				return this;
+			}
+			Reset(cubeSize);
 
-            var pixels = lutImage.GetPixels ();
-            return Convert ((x, y, z) => pixels [IndexOf2D(x, y, z, dim)], dim);
-        }
-        public void ConvertBack(Texture2D lutImage) {
-            var height = _dim;
-            var width = _dim * _dim;
-            lutImage.Resize (width, height);
+			var indexer = new TiledCubeIndexer(cubeSize, w / cubeSize);
+			var inputs = lutImage.GetPixels();
+			var outputs = IterateCubicIndex().Select(i => inputs[indexer[i]]).ToArray();
+			Apply(outputs);
+			return this;
+		}
+		public LUT3D SetDefault() {
+			var dx = 1f / (_dim - 1);
+			var identity = IterateCubicIndex()
+				.Select(v => new Color(v.x * dx, v.y * dx, v.z * dx, 1f))
+				.ToArray();
+			Apply(identity);
+			return this;
+		}
+		#endregion
 
-            var pixels = lutImage.GetPixels ();
-            for (var z = 0; z < _dim; z++)
-                for (var y = 0; y < _dim; y++)
-                    for (var x = 0; x < _dim; x++)
-                        pixels [IndexOf2D(x, y, z)] = this [x, y, z];
-            lutImage.SetPixels (pixels);
-            lutImage.Apply ();
-        }
-
-        public int IndexOf2D(int x, int y, int z) {
-            return IndexOf2D (x, y, z, _dim);
-        }
-        public static int IndexOf2D(int x, int y, int z, int dim) {
-            return x + (z + (dim - y - 1) * dim) * dim;
-        }
-        public int IndexOf3D(int x, int y, int z) {
-            return IndexOf3D(x, y, z, _dim);
-        }
-        public static int IndexOf3D(int x, int y, int z, int dim) {
-            return x + (y + z * dim) * dim;
-        }
-        #endregion
-
-        public virtual void SetProperty(Material mat) {
+		public virtual IEnumerable<Vector3Int> IterateCubicIndex() {
+			for (var z = 0; z < _dim; z++)
+				for (var y = 0; y < _dim; y++)
+					for (var x = 0; x < _dim; x++)
+						yield return new Vector3Int(x, y, z);
+		}
+		public virtual void SetProperty(Material mat) {
             mat.SetFloat (PROP_SCALE, Scale);
             mat.SetFloat (PROP_OFFSET, Offset);
             mat.SetTexture (PROP_3DLUT, _3dlut);
@@ -115,13 +86,8 @@ namespace ColorCorrection {
         public float Offset { get { return 1f / (2f * _dim); } }
         public Texture Texture { get { return _3dlut; } }
 
-        public LUT3D SetDefault() {
-            Convert (new ColorPickerNorm(ConverterBypass));
-            Apply ();
-            return this;
-        }
-        public LUT3D Apply () {
-            _3dlut.SetPixels (_3dcolors);
+        public LUT3D Apply (Color[] pixels) {
+            _3dlut.SetPixels (pixels);
             _3dlut.Apply (false);
             return this;
         }
@@ -140,7 +106,6 @@ namespace ColorCorrection {
         #region IDisposable implementation
         public void Dispose () {
 			_3dlut.Destroy();
-            _3dcolors = null;
         }
         #endregion
     }
