@@ -38,14 +38,14 @@ namespace ColorCorrection {
         }
 
         #region Convert
-        public LUT3D Convert(Texture2D lutImage) {
+        public LUT3D Convert(Texture2D lutImage, bool gammaToLinear = true) {
 			var imageWidth = lutImage.width;
 			var imageHeight = lutImage.height;
 			var inputs = lutImage.GetPixels();
-			return Convert(imageWidth, imageHeight, inputs);
+			return Convert(imageWidth, imageHeight, inputs, gammaToLinear);
 		}
 
-		private LUT3D Convert(int imageWidth, int imageHeight, Color[] inputs) {
+		private LUT3D Convert(int imageWidth, int imageHeight, Color[] inputs, bool gammaToLinear) {
 			var cubeSize = Mathf.RoundToInt(Mathf.Pow(imageWidth * imageHeight, 1f / 3));
 			if (cubeSize <= 0 || cubeSize * cubeSize * cubeSize != imageWidth * imageHeight) {
 				Debug.LogWarningFormat(
@@ -56,8 +56,8 @@ namespace ColorCorrection {
 			Reset(cubeSize);
 
 			var indexer = new TiledCubeIndexer(cubeSize, imageWidth / cubeSize);
-			var outputs = IterateCubicIndex(_dim).Select(i => inputs[indexer[i]]).ToArray();
-			Apply(outputs);
+			var outputs = IterateCubicIndex(_dim).Select(i => inputs[indexer[i]]);
+			Apply(outputs, gammaToLinear);
 			return this;
 		}
 
@@ -66,7 +66,7 @@ namespace ColorCorrection {
 			var identity = IterateCubicIndex(_dim)
 				.Select(v => new Color(v.x * dx, v.y * dx, v.z * dx, 1f))
 				.ToArray();
-			Apply(identity);
+			Apply(identity, false);
 			return this;
 		}
 		#endregion
@@ -93,11 +93,18 @@ namespace ColorCorrection {
         public float Offset { get { return 1f / (2f * _dim); } }
         public Texture Texture { get { return _3dlut; } }
 
-        public LUT3D Apply (Color[] pixels) {
-            _3dlut.SetPixels (pixels);
+        public LUT3D Apply (IEnumerable<Color32> pixels) {
+            _3dlut.SetPixels32 (pixels.ToArray());
             _3dlut.Apply (false);
             return this;
         }
+		public LUT3D Apply(IEnumerable<Color> pixels, bool gammaToLinear) {
+			if (gammaToLinear)
+				pixels = pixels.Select(v => v.linear);
+			_3dlut.SetPixels(pixels.ToArray());
+			_3dlut.Apply(false, false);
+			return this;
+		}
 		#endregion
 
 		#region static
@@ -105,7 +112,7 @@ namespace ColorCorrection {
             return new Color (x, y, z, 1f);
         }
         public static Texture3D Create3DLutTex (int dim) {
-			var tex3d = new Texture3D(dim, dim, dim, TextureFormat.ARGB32, false);
+            var tex3d = new Texture3D (dim, dim, dim, TextureFormat.ARGB32, false);
 			tex3d.wrapMode = TextureWrapMode.Clamp;
             tex3d.filterMode = FilterMode.Bilinear;
 			tex3d.anisoLevel = 0;
