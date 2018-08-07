@@ -37,7 +37,7 @@ namespace ColorCorrection {
             return this;
         }
 
-        #region Convert 
+        #region Convert
         public LUT3D Convert(Texture2D lutImage) {
 			var imageWidth = lutImage.width;
 			var imageHeight = lutImage.height;
@@ -105,7 +105,7 @@ namespace ColorCorrection {
             return new Color (x, y, z, 1f);
         }
         public static Texture3D Create3DLutTex (int dim) {
-            var tex3d = new Texture3D (dim, dim, dim, TextureFormat.ARGB32, false);
+			var tex3d = new Texture3D(dim, dim, dim, TextureFormat.ARGB32, false);
 			tex3d.wrapMode = TextureWrapMode.Clamp;
             tex3d.filterMode = FilterMode.Bilinear;
 			tex3d.anisoLevel = 0;
