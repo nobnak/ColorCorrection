@@ -1,11 +1,16 @@
+using nobnak.Gist;
 using nobnak.Gist.Loader;
 using System.IO;
 using System.Text;
 using UnityEngine;
 
 namespace ColorCorrection {
+
 	[ExecuteInEditMode]
     public class ImageLUTLoader : LUTGenerator {
+
+		[SerializeField]
+		protected bool gammaToLinear = false;
 		[SerializeField]
 		protected Texture2D alternativeImage;
 		[SerializeField]
@@ -14,9 +19,10 @@ namespace ColorCorrection {
 		#region Unity
 		protected override void Awake() {
 			base.Awake();
-			loader.Changed += ListenLoaderOnChanged;
+			loader.Changed += v => validator.Invalidate();
 		}
-		protected void Update() {
+		protected override void Update() {
+			base.Update();
 			loader.Validate();
 		}
 		protected override void OnDestroy() {
@@ -30,33 +36,28 @@ namespace ColorCorrection {
 			get { return alternativeImage; }
 			set {
 				if (alternativeImage != value) {
+					validator.Invalidate();
 					alternativeImage = value;
-					UpdateLUT();
 				}
 			}
 		}
 		#endregion
 
-		protected void ListenLoaderOnChanged(Texture2D tex) {
-			UpdateLUT();
-		}
-		protected void UpdateLUT () {
+		protected override void UpdateLUT () {
 			if (lut != null) {
 				var buf = new StringBuilder("UpdateLUT : ");
 				if (loader != null && loader.Target != null) {
 					var tex = loader.Target;
-					lut.Convert(tex);
+					lut.Convert(tex, gammaToLinear);
 					buf.AppendFormat(tex.name);
 				} else if (alternativeImage != null) {
-					lut.Convert(alternativeImage);
+					lut.Convert(alternativeImage, gammaToLinear);
 					buf.AppendFormat("Alternative {0}", alternativeImage.name);
 				} else {
 					lut.SetDefault();
 					buf.AppendFormat("Reset");
 				}
 				Debug.Log(buf.ToString());
-
-				NotifyOnUpdate();
 			}
         }
     }
