@@ -30,7 +30,7 @@ namespace ColorCorrection {
 		public LUT3D Reset(int dim) {
             if (_3dlut == null || _dim != dim) {
                 _dim = dim;
-				_3dlut.Destroy();
+				_3dlut.DestroySelf();
                 _3dlut = Create3DLutTex (dim);
             }
             SetDefault ();
@@ -73,7 +73,7 @@ namespace ColorCorrection {
 
 		#region IDisposable implementation
 		public void Dispose() {
-			_3dlut.Destroy();
+			_3dlut.DestroySelf();
 		}
 		#endregion
 
